@@ -1,0 +1,35 @@
+name: 🤖 Update News Robot
+
+on:
+  schedule:
+    # Se lance toutes les 6 heures (00h, 06h, 12h, 18h)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Permet de cliquer sur un bouton pour forcer le lancement
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Installation Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 📦 Installation des outils
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          npm install -g firebase-tools
+
+      - name: 🚀 Lancement du Script News
+        run: python update_constructive.py
+        # ATTENTION : Le nom du fichier ici doit être EXACTEMENT le nom de votre script Python
+
+      - name: 🔥 Déploiement vers Firebase
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only hosting --token "$FIREBASE_TOKEN"
